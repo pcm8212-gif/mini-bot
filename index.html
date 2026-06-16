@@ -103,6 +103,7 @@
         .btn-stop-auto { background-color: #c0392b; color: white; }
     </style>
     
+    <!-- Monetag Script Loader Container -->
     <div id="monetag-script-container"></div>
 </head>
 <body>
@@ -161,20 +162,31 @@
 
     let autoAdInterval = null;
     let isScriptLoaded = false;
+    let cleanZoneId = ""; // শুধুমাত্র পিওর নম্বর আইডি রাখার জন্য
 
     // Firebase থেকে ডাটা রিয়েল-টাইম লোড করা
     database.ref('mini_bot_user').on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
             userData = data;
+            
+            // ডাটাবেজে পুরো স্ক্রিপ্ট টেক্সট থাকলেও সেখান থেকে শুধু সংখ্যা (Zone ID) ফিল্টার করে নেওয়া
+            if(userData.zoneId) {
+                const match = userData.zoneId.match(/\d+/);
+                cleanZoneId = match ? match[0] : "8888888";
+            } else {
+                cleanZoneId = "8888888";
+            }
+
             updateUI();
             
-            // জোন আইডি পরিবর্তন হলে Monetag স্ক্রিপ্ট নতুন করে লোড হবে
-            if (!isScriptLoaded || document.getElementById('monetag-script-container').dataset.zone !== userData.zoneId) {
-                loadMonetagScript(userData.zoneId);
+            // জোন আইডি লোড বা পরিবর্তন হলে Monetag স্ক্রিপ্ট নতুন করে লোড হবে
+            const container = document.getElementById('monetag-script-container');
+            if (!isScriptLoaded || container.dataset.zone !== cleanZoneId) {
+                loadMonetagScript(cleanZoneId);
             }
         } else {
-            // ডাটাবেজ খালি থাকলে ইনিশিয়াল ডাটা সেট হবে
+            // ডাটাবেজ খালি থাকলে ইনিশিয়াল ডাটা সেট হবে
             database.ref('mini_bot_user').set(userData);
         }
     });
@@ -194,20 +206,38 @@
 
         if(!zoneId || zoneId === "8888888") return;
 
+        // সঠিক উপায়ে Monetag SDK ইনজেক্ট করা
         let script = document.createElement('script');
-        script.src = `https://alwingulla.com/zone/3e/6c/${zoneId}/zone.js`; 
+        script.src = `https://libtl.com/sdk.js`; 
+        script.dataset.zone = zoneId;
+        script.dataset.sdk = `show_${zoneId}`;
         script.async = true;
+        
+        script.onload = () => {
+            console.log("Monetag SDK successfully loaded for zone: " + zoneId);
+        };
+
         container.appendChild(script);
         isScriptLoaded = true;
     }
 
     function watchAd() {
-        if (!userData.zoneId || userData.zoneId.trim() === "" || userData.zoneId === "8888888") {
+        if (!cleanZoneId || cleanZoneId === "8888888") {
             alert("Please set a valid Monetag Zone ID in Admin Panel first!");
             return;
         }
 
-        alert("Loading Monetag Ad (Zone ID: " + userData.zoneId + ")...");
+        // Monetag এর গ্লোবাল অ্যাড শো ফাংশন ট্রিগার করা
+        const targetMethod = `show_${cleanZoneId}`;
+
+        if (typeof window[targetMethod] === 'function') {
+            // আসল বিজ্ঞাপনটি ব্যবহারকারীকে দেখানো হচ্ছে
+            window[targetMethod](); 
+        } else {
+            alert("Ad is loading or browser blocked the script. Please wait or turn off AdBlocker.");
+            if (!isScriptLoaded) loadMonetagScript(cleanZoneId);
+            return;
+        }
         
         // ভিউ ও ব্যালেন্স বাড়িয়ে ফায়ারবেসে সেভ করা
         let newViews = (userData.views || 0) + 1;
@@ -221,7 +251,8 @@
         database.ref('mini_bot_user').update({
             views: newViews,
             balance: newBalance,
-            clicks: newClicks
+            clicks: newClicks,
+            zoneId: userData.zoneId // অরিজিনাল ডাটা যাতে নষ্ট না হয়
         });
     }
 
@@ -230,10 +261,11 @@
             alert("Auto Ads is already running!");
             return;
         }
-        alert("Auto Ads started! It will load an ad every 10 seconds.");
+        // কম টাইমিং দিলে অ্যাকাউন্ট রিস্ক থাকে, তাই ১৫ সেকেন্ড বা তার বেশি রাখা ভালো
+        alert("Auto Ads started! It will try to load an ad every 15 seconds.");
         autoAdInterval = setInterval(() => {
             watchAd();
-        }, 10000); 
+        }, 15000); 
     }
 
     function stopAutoAds() {
