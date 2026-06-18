@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>💹UparjonBot?💹 - Premium User Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        :root {
+            --font-family: 'Poppins', sans-serif;
+            --primary-color: #FF6B35; 
+            --primary-gradient: linear-gradient(135deg, #FF6B35, #FF8C42);
+            --secondary-color: #FF9F1C;
+            --background-light: #F7F9FB; 
+            --surface-light: #FFFFFF; 
+            --text-primary-light: #1A2530; 
+            --text-secondary-light: #7A8B9E; 
+            --border-light: #E2E8F0;
+            --background-dark: #0F172A; 
+            --surface-dark: #1E293B; 
+            --text-primary-dark: #F8FAFC; 
+            --text-secondary-dark: #94A3B8; 
+            --border-dark: #334155;
+            --success: #10B981; 
+            --danger: #EF4444; 
+            --pending: #F59E0B;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-family); transition: background-color 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; background-color: var(--background-light); color: var(--text-primary-light); }
+        body.dark-theme { background-color: var(--background-dark); color: var(--text-primary-dark); }
+        
+        /* Auth Styles */
+        .auth-container { max-width: 420px; margin: 40px auto; padding: 40px 30px; border-radius: 24px; background: var(--surface-light); box-shadow: var(--shadow); border: 1px solid var(--border-light); }
+        body.dark-theme .auth-container { background: var(--surface-dark); box-shadow: none; border-color: var(--border-dark); }
+        .auth-container h2 { text-align: center; margin-bottom: 25px; font-weight: 700; color: var(--primary-color); font-size: 1.8rem; }
+        .auth-container p { text-align: center; margin-top: 20px; font-size: 0.95rem; color: var(--text-secondary-light); }
+        body.dark-theme .auth-container p { color: var(--text-secondary-dark); }
+        .auth-container p span { color: var(--primary-color); cursor: pointer; font-weight: 600; text-decoration: underline; }
+        
+        /* App Styles */
+        #app { max-width: 480px; margin: 0 auto; padding-bottom: 90px; background: var(--surface-light); min-height: 100vh; box-shadow: var(--shadow); position: relative; }
+        body.dark-theme #app { background: var(--background-dark); }
+        .page { display: none; padding: 20px; }
+        .page.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Profile Header */
+        .profile-header { padding: 30px 20px; border-bottom: 1px solid var(--border-light); display: flex; flex-direction: column; align-items: center; text-align: center; background: var(--surface-light); position: relative; }
+        body.dark-theme .profile-header { background: var(--surface-dark); border-bottom-color: var(--border-dark); }
+        #user-photo { width: 90px; height: 90px; border-radius: 50%; border: 4px solid var(--primary-color); object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2); background-color: #ffece5; }
+        #user-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+        #user-balance-container { font-size: 0.95rem; font-weight: 500; color: var(--text-secondary-light); background: var(--background-light); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border-light); }
+        body.dark-theme #user-balance-container { color: var(--text-secondary-dark); background: var(--background-dark); border-color: var(--border-dark); }
+        #user-balance { font-size: 1.2rem; font-weight: 700; color: var(--primary-color); }
+
+        /* Notice Board Style */
+        .notice-card { background: #FFF3CD; border: 1px solid #FFEBAA; border-radius: 14px; padding: 15px; margin-top: 15px; width: 100%; display: none; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        body.dark-theme .notice-card { background: #2C2615; border-color: #4D3E1A; }
+        .notice-title { font-size: 0.95rem; font-weight: 700; color: #856404; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        body.dark-theme .notice-title { color: #F3CB4D; }
+        .notice-text { font-size: 0.88rem; color: #664D03; line-height: 1.5; font-weight: 500; white-space: pre-line; }
+        body.dark-theme .notice-text { color: #E2D1A6; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-card { padding: 20px 15px; border-radius: 18px; text-align: center; border: 1px solid var(--border-light); background: var(--surface-light); box-shadow: var(--shadow); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        body.dark-theme .stat-card { background: var(--surface-dark); border-color: var(--border-dark); box-shadow: none; }
+        .stat-card h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: var(--text-secondary-light); letter-spacing: 0.5px; }
+        body.dark-theme .stat-card h3 { color: var(--text-secondary-dark); }
+        .stat-card p { font-size: 1.3rem; font-weight: 700; color: var(--text-primary-light); }
+        body.dark-theme .stat-card p { color: var(--text-primary-dark); }
+        
+        /* Chart & Wallet Cards */
+        .earning-wallet-card, .section-card { padding: 20px; border-radius: 18px; margin-top: 20px; border: 1px solid var(--border-light); background: var(--surface-light); box-shadow: var(--shadow); }
+        body.dark-theme .earning-wallet-card, body.dark-theme .section-card { background: var(--surface-dark); border-color: var(--border-dark); box-shadow: none; }
+        
+        /* Forms & Inputs */
+        form label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary-light); margin-bottom: 5px; display: block; text-transform: uppercase; }
+        body.dark-theme form label { color: var(--text-secondary-dark); }
+        form input, form select { width: 100%; padding: 14px; margin-top: 4px; margin-bottom: 18px; border-radius: 12px; border: 1px solid var(--border-light); background: var(--background-light); color: var(--text-primary-light); font-family: var(--font-family); font-size: 0.95rem; }
+        body.dark-theme form input, body.dark-theme form select { border-color: var(--border-dark); background: var(--background-dark); color: var(--text-primary-dark); }
+
+        /* Buttons */
+        .action-btn { width: 100%; padding: 14px 20px; font-size: 1rem; font-weight: 600; color: #fff; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: var(--primary-gradient); text-align: center; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25); }
+        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .action-btn:disabled { background: #94A3B8; cursor: not-allowed; box-shadow: none; transform: none; opacity: 0.6; }
+        
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
+        body.dark-theme .bottom-nav { background: rgba(30, 41, 59, 0.85); border-top-color: var(--border-dark); }
+        .nav-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-family: var(--font-family); font-size: 0.75rem; font-weight: 500; color: var(--text-secondary-light); flex-grow: 1; }
+        body.dark-theme .nav-btn { color: var(--text-secondary-dark); }
+        .nav-btn i { font-size: 1.4rem; margin-bottom: 5px; }
+        .nav-btn.active { color: var(--primary-color); font-weight: 600; }
+
+        /* Tasks */
+        .task-container { padding: 20px; border-radius: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; background: var(--surface-light); border: 1px solid var(--border-light); box-shadow: var(--shadow); }
+        body.dark-theme .task-container { background: var(--surface-dark); border-color: var(--border-dark); box-shadow: none; }
+        .task-container h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+        .task-container p { font-size: 0.85rem; color: var(--success); font-weight: 600; }
+        .task-container .action-btn { width: auto; padding: 10px 18px; font-size: 0.9rem; }
+
+        /* History Design Elements */
+        .history-section-title { font-size: 1.2rem; font-weight: 700; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 8px; }
+        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .history-item { padding: 15px; border-radius: 14px; border: 1px solid var(--border-light); background: var(--surface-light); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        body.dark-theme .history-item { background: var(--surface-dark); border-color: var(--border-dark); }
+        .history-details h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
+        .history-details p { font-size: 0.8rem; color: var(--text-secondary-light); }
+        body.dark-theme .history-details p { color: var(--text-secondary-dark); }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
+        .status-badge.pending { background: #FFF3CD; color: #856404; }
+        .status-badge.completed { background: #D1E7DD; color: #0F5132; }
+        .status-badge.rejected { background: #F8D7DA; color: #842029; }
+        body.dark-theme .status-badge.pending { background: #3a341e; color: #F3CB4D; }
+        body.dark-theme .status-badge.completed { background: #143527; color: #75b798; }
+        body.dark-theme .status-badge.rejected { background: #3c1e22; color: #ea868f; }
+
+        /* Loader & Popups */
+        #app-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; background-color: var(--background-light); }
+        body.dark-theme #app-loader { background-color: var(--background-dark); }
+        .spinner { width: 55px; height: 55px; border-radius: 50%; border: 4px solid var(--border-light); border-top-color: var(--primary-color); animation: spin 0.8s linear infinite; }
+        #loading-progress { margin-top: 20px; font-size: 1.1rem; font-weight: 600; color: var(--primary-color); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Custom Modern Modal Popup */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        .popup-content { padding: 25px; border-radius: 20px; text-align: center; max-width: 85%; width: 320px; background-color: var(--surface-light); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid var(--border-light); }
+        body.dark-theme .popup-content { background-color: var(--surface-dark); border-color: var(--border-dark); }
+        .popup-icon { font-size: 3rem; margin-bottom: 15px; }
+        .popup-icon.success { color: var(--success); }
+        .popup-icon.error { color: var(--danger); }
+        .popup-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+        .popup-msg { font-size: 0.95rem; color: var(--text-secondary-light); margin-bottom: 20px; line-height: 1.4; }
+        body.dark-theme .popup-msg { color: var(--text-secondary-dark); }
+
+        /* Full Screen Live Ad Player Mode */
+        #ad-player-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #a2d2a2 linear-gradient(180deg, #b7e4b7 0%, #e8f5e9 100%); z-index: 99999; display: none; flex-direction: column; justify-content: space-between; align-items: center; padding: 40px 20px; text-align: center; font-family: sans-serif; }
+        .ad-top-bar { width: 100%; display: flex; justify-content: flex-end; padding: 0 10px; }
+        .ad-timer-badge { background: rgba(0, 0, 0, 0.6); color: #fff; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .ad-main-card { background: #ffffff; border-radius: 16px; padding: 30px 20px; width: 90%; max-width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin-top: 40px; }
+        .ad-main-card h4 { font-size: 1.25rem; color: #111; margin-bottom: 12px; font-weight: bold; }
+        .ad-main-card p { font-size: 0.95rem; color: #555; line-height: 1.4; }
+        .ad-monetag-brand { background: #1e3a1e; color: #8bd88b; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 40px; letter-spacing: 0.5px; }
+        .ad-footer-area { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .ad-reward-toast { background: #1b4332; color: #fff; padding: 12px 25px; border-radius: 30px; font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .ad-continue-btn { width: 90%; max-width: 340px; background: #007bff; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,123,255,0.3); transition: background 0.2s; }
+        .ad-continue-btn:hover { background: #0056b3; }
+        
+        .theme-toggle-btn, .logout-header-btn { position: absolute; top: 20px; background: none; border: none; font-size: 1.3rem; cursor: pointer; }
+        .theme-toggle-btn { left: 20px; color: var(--text-secondary-light); }
+        body.dark-theme .theme-toggle-btn { color: var(--text-secondary-dark); }
+        .logout-header-btn { right: 20px; color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div id="app-loader">
+        <div class="spinner"></div>
+        <p id="loading-progress">0%</p>
+    </div>
+    
+    <div id="custom-popup" class="popup-overlay">
+        <div class="popup-content">
+            <div id="popup-icon-box" class="popup-icon"></div>
+            <div id="popup-title-box" class="popup-title"></div>
+            <div id="popup-msg-box" class="popup-msg"></div>
+            <button id="popup-close-btn" class="action-btn">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <div id="ad-player-screen">
+        <div class="ad-top-bar">
+            <div id="ad-timer-display" class="ad-timer-badge">
+                <i class="fas fa-clock"></i> <span id="ad-seconds">00:15</span>
+            </div>
+        </div>
+        <div class="ad-main-card">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📥</div>
+            <h4>Download is ready</h4>
+            <p>Tap to proceed</p>
+            <div style="font-size: 0.75rem; color:#aaa; text-align:right; margin-top:15px;">Ad</div>
+        </div>
+        <div class="ad-footer-area">
+            <div class="ad-monetag-brand">ads by Monetag</div>
+            <div id="ad-reward-status" class="ad-reward-toast" style="display:none;">
+                <i class="fas fa-check-circle"></i> Click to get the reward!
+            </div>
+            <button id="ad-continue-action" class="ad-continue-btn">Continue</button>
+        </div>
+    </div>
+
+    <div id="login-page" class="auth-container">
+        <h2>Login to 💹UparjonBot💹</h2>
+        <form id="login-form">
+            <label>Username or Email</label>
+            <input type="text" id="login-identifier" required placeholder="Enter username or email">
+            <label>Password</label>
+            <input type="password" id="login-password" required placeholder="Enter password">
+            <button type="submit" class="action-btn">Login</button>
+        </form>
+        <p>Don't have an account? <span id="go-to-signup">Sign Up</span></p>
+    </div>
+
+    <div id="signup-page" class="auth-container" style="display: none;">
+        <h2>Create Account</h2>
+        <form id="signup-form">
+            <label>Username</label>
+            <input type="text" id="signup-username" required placeholder="Choose a unique username">
+            <label>Gmail</label>
+            <input type="email" id="signup-email" required placeholder="Enter your gmail">
+            <label>Phone Number</label>
+            <input type="tel" id="signup-phone" required placeholder="Enter mobile number">
+            <label>Profile Image URL (Optional)</label>
+            <input type="url" id="signup-photo" placeholder="Paste image link">
+            <label>Password</label>
+            <input type="password" id="signup-password" required placeholder="Create password">
+            <button type="submit" class="action-btn">Sign Up</button>
+        </form>
+        <p>Already have an account? <span id="go-to-login">Login</span></p>
+    </div>
+
+    <div id="app" style="display: none;">
+        <header class="profile-header">
+            <button class="theme-toggle-btn" id="theme-toggle"><i class="fas fa-moon"></i></button>
+            <button class="logout-header-btn" id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            <img id="user-photo" src="" alt="User">
+            <h1 id="user-name">Loading...</h1>
+            <div id="user-balance-container">Main Balance: <span id="user-balance">0.00</span> TK</div>
+            
+            <div id="admin-notice-board" class="notice-card">
+                <div class="notice-title"><i class="fas fa-bullhorn"></i> কাজের নিয়ম ও নোটিশ:</div>
+                <div id="admin-notice-text" class="notice-text">লোডিং...</div>
+            </div>
+        </header>
+        
+        <main id="main-content">
+            <div id="home-page" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card"><h3>Today's Ads</h3><p id="daily-ads-watched">0 / 0</p></div>
+                    <div class="stat-card"><h3>Total Referrals</h3><p id="referral-count">0</p></div>
+                    <div class="stat-card"><h3>Total Ads Watched</h3><p id="total-ads-watched">0</p></div>
+                    <div class="stat-card"><h3>Total Income</h3><p id="total-earned">0.00</p></div>
+                </div>
+            </div>
+            
+            <div id="tasks-page" class="page">
+                <div id="ad-task-container">
+                    <div class="task-container">
+                        <div style="flex-grow:1;">
+                            <h3>Watch Video Ad</h3>
+                            <p id="ad-payout-text">Loading payout info...</p>
+                        </div>
+                        <button id="watch-ad-btn" class="action-btn">Watch</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="leaderboard-page" class="page">
+                <h2 style="font-size: 1.5rem; margin-bottom:15px;">Leaderboard</h2>
+                <div id="leaderboard-list" class="history-list">
+                    </div>
+            </div>
+            
+            <div id="profile-page" class="page">
+                <div id="withdraw-notice-gate" class="notice-card" style="margin-bottom: 20px; display: none; background: #fee2e2; border-color: #fca5a5;">
+                    <div class="notice-title" style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> উইথড্র বন্ধ রয়েছে:</div>
+                    <div id="withdraw-gate-text" class="notice-text" style="color: #991b1b;"></div>
+                </div>
+
+                <div id="withdraw-section" class="section-card">
+                    <h2 style="font-size: 1.3rem; margin-bottom:20px; font-weight:700;">Withdraw Funds</h2>
+                    <form id="withdraw-form">
+                        <label>Select Method</label>
+                        <select id="withdraw-method">
+                            </select>
+                        <label>Withdraw Number</label>
+                        <input type="tel" id="withdraw-number" required placeholder="Enter Number">
+                        <label>Amount (TK)</label>
+                        <input type="number" id="withdraw-amount" required placeholder="Enter Amount">
+                        <button type="submit" id="withdraw-submit-btn" class="action-btn">Submit Withdraw</button>
+                    </form>
+                </div>
+
+                <div class="history-section-title">
+                    <i class="fas fa-history" style="color: var(--primary-color);"></i> Withdraw History
+                </div>
+                <div id="withdraw-history-list" class="history-list">
+                    <p style="text-align: center; color: var(--text-secondary-light); font-size: 0.9rem; padding: 10px;">No withdrawal records found.</p>
+                </div>
+            </div>
+        </main>
+        
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="home-page"><i class="fas fa-home"></i><span>Home</span></button>
+            <button class="nav-btn" data-page="tasks-page"><i class="fas fa-tasks"></i><span>Tasks</span></button>
+            <button class="nav-btn" data-page="leaderboard-page"><i class="fas fa-trophy"></i><span>Leaderboard</span></button>
+            <button class="nav-btn" data-page="profile-page"><i class="fas fa-wallet"></i><span>Wallet</span></button>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDga-OHqMVJxKglEaz2W2FEgrV0-c4cr-U",
+  authDomain: "uparjonbot.firebaseapp.com",
+  databaseURL: "https://uparjonbot-default-rtdb.firebaseio.com",
+  projectId: "uparjonbot",
+  storageBucket: "uparjonbot.firebasestorage.app",
+  messagingSenderId: "232864860286",
+  appId: "1:232864860286:web:9e8f9a927316f91a8bb02f",
+  measurementId: "G-TJ9PWPXNL1"
+};
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let appConfig = { dailyAdLimit: 40, adValue: 1.00, monetagZoneId: "", withdrawStatus: "on", withdrawNotice: "" }; 
+        let userState = null; 
+        let currentLoadedMethods = [];
+
+        let isAdRunning = false;
+        let adTimeRemaining = 15;
+        let adCountdownInterval = null;
+
+        const showAlertModal = (type, title, msg) => {
+            const popup = document.getElementById('custom-popup');
+            const iconBox = document.getElementById('popup-icon-box');
+            const titleBox = document.getElementById('popup-title-box');
+            const msgBox = document.getElementById('popup-msg-box');
+
+            if(type === 'success') {
+                iconBox.className = "popup-icon success";
+                iconBox.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else {
+                iconBox.className = "popup-icon error";
+                iconBox.innerHTML = '<i class="fas fa-times-circle"></i>';
+            }
+
+            titleBox.textContent = title;
+            msgBox.textContent = msg;
+            popup.style.display = 'flex';
+        };
+
+        document.getElementById('popup-close-btn').onclick = () => {
+            document.getElementById('custom-popup').style.display = 'none';
+        };
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.onclick = () => {
+            document.body.classList.toggle('dark-theme');
+            const icon = themeToggleBtn.querySelector('i');
+            icon.className = document.body.classList.contains('dark-theme') ? 'fas fa-sun' : 'fas fa-moon';
+        };
+
+        document.getElementById('go-to-signup').onclick = () => {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('signup-page').style.display = 'block';
+        };
+        document.getElementById('go-to-login').onclick = () => {
+            document.getElementById('signup-page').style.display = 'none';
+            document.getElementById('login-page').style.display = 'block';
+        };
+
+        const setupNavigation = () => {
+            const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
+            const pages = document.querySelectorAll('.page');
+            
+            navButtons.forEach(btn => {
+                btn.onclick = () => {
+                    if(userState && userState.status === 'blocked') return;
+                    const targetPageId = btn.getAttribute('data-page');
+                    navButtons.forEach(b => b.classList.remove('active'));
+                    pages.forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(targetPageId).classList.add('active');
+                };
+            });
+        };
+
+        const triggerLoader = () => {
+            return new Promise((resolve) => {
+                const loader = document.getElementById('app-loader');
+                loader.style.display = 'flex';
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    document.getElementById('loading-progress').textContent = `${progress}%`;
+                    if(progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => { loader.style.display = 'none'; resolve(); }, 300);
+                    }
+                }, 30);
+            });
+        };
+
+        document.getElementById('logout-btn').onclick = () => {
+            localStorage.removeItem('💹UparjonBot💹_saved_user');
+            localStorage.removeItem('💹UparjonBot💹_saved_pass');
+            location.reload();
+        };
+
+        document.getElementById('signup-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('signup-username').value.trim().toLowerCase();
+            const email = document.getElementById('signup-email').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
+            const photoUrl = document.getElementById('signup-photo').value.trim() || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            const password = document.getElementById('signup-password').value;
+
+            try {
+                const userCheck = await db.ref(`users/${username}`).once('value');
+                if(userCheck.exists()) return alert("Username already taken!");
+
+                await db.ref(`users/${username}`).set({
+                    username, email, phone, photoUrl, password, status: "active",
+                    balance: 0, referrals: 0, totalEarned: 0, lifetimeAdCount: 0, dailyAdCount: 0,
+                    invalidClicks: 0, lastAdWatchDate: new Date().toISOString().slice(0, 10)
+                });
+
+                alert("Registration Successful!");
+                document.getElementById('login-identifier').value = username;
+                document.getElementById('login-password').value = password;
+                document.getElementById('signup-page').style.display = 'none';
+                document.getElementById('login-page').style.display = 'block';
+            } catch(err) { alert("Signup error!"); }
+        };
+
+        const performLogin = async (identifier, password, isAutoLogin = false) => {
+            try {
+                const snap = await db.ref(`users/${identifier}`).once('value');
+                if(snap.exists() && snap.val().password === password) {
+                    const user = snap.val();
+                    if(user.status === 'blocked') {
+                        if(!isAutoLogin) alert("⚠️ Your account has been BLOCKED by Admin!");
+                        return false;
+                    }
+                    userState = user;
+                    localStorage.setItem('💹UparjonBot💹_saved_user', user.username);
+                    localStorage.setItem('💹UparjonBot💹_saved_pass', password);
+                    document.getElementById('login-page').style.display = 'none';
+                    await triggerLoader();
+                    await initApp();
+                    document.getElementById('app').style.display = 'block';
+                    return true;
+                } else {
+                    if(!isAutoLogin) alert("Wrong Credentials!");
+                    return false;
+                }
+            } catch(err) { return false; }
+        };
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            await performLogin(identifier, password, false);
+        };
+
+        // Inject Dynamic Monetag Engine Script
+        const injectMonetagSDK = (zoneId) => {
+            if(!zoneId || document.getElementById('monetag-sdk')) return;
+            const script = document.createElement('script');
+            script.id = 'monetag-sdk';
+            script.src = `https://growthofcontent.com/act/files/tag.min.js?z=${zoneId}`;
+            script.async = true;
+            document.head.appendChild(script);
+        };
+
+        const initApp = async () => {
+            setupNavigation();
+
+            // Realtime Admin Control Engine Listener
+            db.ref('config').on('value', (configSnapshot) => {
+                if(configSnapshot.exists()) {
+                    const data = configSnapshot.val();
+                    appConfig.dailyAdLimit = parseInt(data.dailyAdLimit || 40);
+                    appConfig.adValue = parseFloat(data.adValue || 1.00);
+                    appConfig.monetagZoneId = data.monetagZoneId || "";
+                    appConfig.withdrawStatus = data.withdrawStatus || "on";
+                    appConfig.withdrawNotice = data.withdrawNotice || "";
+
+                    injectMonetagSDK(appConfig.monetagZoneId);
+                }
+                renderUI();
+            });
+
+            db.ref(`users/${userState.username}`).on('value', (userSnapshot) => {
+                if(userSnapshot.exists()) {
+                    userState = userSnapshot.val();
+                    if(userState.status === 'blocked') {
+                        alert("🔴 Your account has been blocked!");
+                        location.reload();
+                        return;
+                    }
+                    renderUI();
+                }
+            });
+
+            db.ref('notice').on('value', (snapshot) => {
+                const noticeBoard = document.getElementById('admin-notice-board');
+                const noticeTextEl = document.getElementById('admin-notice-text');
+                if (snapshot.exists() && snapshot.val().trim() !== "") {
+                    noticeTextEl.textContent = snapshot.val();
+                    noticeBoard.style.display = 'block';
+                } else {
+                    noticeBoard.style.display = 'none';
+                }
+            });
+
+            // Dynamic Withdraw Methods Fetcher
+            db.ref('withdraw_methods').on('value', snap => {
+                const select = document.getElementById('withdraw-method');
+                select.innerHTML = '';
+                currentLoadedMethods = [];
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        const m = child.val();
+                        currentLoadedMethods.push(m);
+                        const opt = document.createElement('option');
+                        opt.value = m.name;
+                        opt.textContent = `${m.name} (Min: ${m.limit} TK)`;
+                        select.appendChild(opt);
+                    });
+                }
+            });
+
+            // Fetch Withdraw History Live
+            db.ref('withdrawals').orderByChild('username').equalTo(userState.username).on('value', snap => {
+                const container = document.getElementById('withdraw-history-list');
+                container.innerHTML = '';
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        const w = child.val();
+                        container.innerHTML += `
+                            <div class="history-item">
+                                <div class="history-details">
+                                    <h4>${w.method} Payment</h4>
+                                    <p>${w.number}</p>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-weight:700; color:var(--primary-color);">${w.amount} TK</div>
+                                    <span class="status-badge ${w.status}">${w.status}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary-light); font-size: 0.9rem; padding: 10px;">No withdrawal records found.</p>';
+                }
+            });
+
+            // Leaderboard Database Logic
+            db.ref('users').orderByChild('balance').limitToLast(10).on('value', snap => {
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = '';
+                let ranks = [];
+                snap.forEach(c => { ranks.push(c.val()); });
+                ranks.reverse().forEach((u, i) => {
+                    list.innerHTML += `
+                        <div class="history-item">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-weight:700; width:20px;">#${i+1}</span>
+                                <img src="${u.photoUrl}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
+                                <span style="font-weight:600;">${u.username}</span>
+                            </div>
+                            <div style="font-weight:700; color:var(--success);">${parseFloat(u.balance).toFixed(2)} TK</div>
+                        </div>
+                    `;
+                });
+            });
+        };
+
+        const renderUI = () => {
+            if(!userState) return;
+            
+            // Check & Reset Daily counter if date changes
+            const todayStr = new Date().toISOString().slice(0, 10);
+            if(userState.lastAdWatchDate !== todayStr) {
+                db.ref(`users/${userState.username}`).update({
+                    dailyAdCount: 0,
+                    lastAdWatchDate: todayStr
+                });
+            }
+
+            document.getElementById('user-photo').src = userState.photoUrl;
+            document.getElementById('user-name').textContent = userState.username;
+            document.getElementById('user-balance').textContent = parseFloat(userState.balance).toFixed(2);
+            
+            document.getElementById('daily-ads-watched').textContent = `${userState.dailyAdCount || 0} / ${appConfig.dailyAdLimit}`;
+            document.getElementById('referral-count').textContent = userState.referrals || 0;
+            document.getElementById('total-ads-watched').textContent = userState.lifetimeAdCount || 0;
+            document.getElementById('total-earned').textContent = parseFloat(userState.totalEarned || 0).toFixed(2);
+            document.getElementById('ad-payout-text').textContent = `Earn ${appConfig.adValue.toFixed(2)} TK per click`;
+
+            // Control Withdraw gate
+            const gate = document.getElementById('withdraw-notice-gate');
+            const submitBtn = document.getElementById('withdraw-submit-btn');
+            if(appConfig.withdrawStatus === 'off') {
+                gate.style.display = 'block';
+                document.getElementById('withdraw-gate-text').textContent = appConfig.withdrawNotice || "উইথড্র সাময়িকভাবে বন্ধ আছে।";
+                submitBtn.disabled = true;
+            } else {
+                gate.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        };
+
+        // Monetag Integration & Real Ad Engine Clicker
+        document.getElementById('watch-ad-btn').onclick = () => {
+            if((userState.dailyAdCount || 0) >= appConfig.dailyAdLimit) {
+                return showAlertModal('error', 'Limit Out!', 'আজকের লিমিট শেষ! আগামীকাল আবার চেষ্টা করুন।');
+            }
+            
+            // Monetag Smart Link Redirect or Fallback Mock Player Execution
+            if(appConfig.monetagZoneId) {
+                try {
+                    // Call the real Monetag native direct click script if available
+                    if(window.showNetworkAd) {
+                        window.showNetworkAd();
+                    }
+                } catch(e) { console.log(e); }
+            }
+
+            // Launch Immersive Ad Viewer UI screen
+            isAdRunning = true;
+            adTimeRemaining = 15;
+            document.getElementById('ad-seconds').textContent = "00:15";
+            document.getElementById('ad-reward-status').style.display = 'none';
+            document.getElementById('ad-player-screen').style.display = 'flex';
+
+            adCountdownInterval = setInterval(() => {
+                adTimeRemaining--;
+                document.getElementById('ad-seconds').textContent = `00:${adTimeRemaining < 10 ? '0' : ''}${adTimeRemaining}`;
+                if(adTimeRemaining <= 0) {
+                    clearInterval(adCountdownInterval);
+                    document.getElementById('ad-reward-status').style.display = 'flex';
+                }
+            }, 1000);
+        };
+
+        document.getElementById('ad-continue-action').onclick = () => {
+            if(adTimeRemaining > 0) {
+                // Fraud Protection: User clicked continue before timer finished
+                clearInterval(adCountdownInterval);
+                isAdRunning = false;
+                document.getElementById('ad-player-screen').style.display = 'none';
+                
+                let currentInvalid = parseInt(userState.invalidClicks || 0) + 1;
+                db.ref(`users/${userState.username}`).update({ invalidClicks: currentInvalid });
+                showAlertModal('error', 'Invalid Click!', 'সময় শেষ হওয়ার আগেই আপনি ব্যাক করেছেন! ইনভ্যালিড ক্লিক কাউন্ট করা হয়েছে।');
+                return;
+            }
+
+            // Grant Safe Rewards Update to Database
+            clearInterval(adCountdownInterval);
+            isAdRunning = false;
+            document.getElementById('ad-player-screen').style.display = 'none';
+
+            const nextBal = parseFloat(userState.balance || 0) + appConfig.adValue;
+            const nextDaily = parseInt(userState.dailyAdCount || 0) + 1;
+            const nextLife = parseInt(userState.lifetimeAdCount || 0) + 1;
+            const nextEarned = parseFloat(userState.totalEarned || 0) + appConfig.adValue;
+
+            db.ref(`users/${userState.username}`).update({
+                balance: nextBal,
+                dailyAdCount: nextDaily,
+                lifetimeAdCount: nextLife,
+                totalEarned: nextEarned
+            }).then(() => {
+                showAlertModal('success', 'অভিনন্দন!', `${appConfig.adValue} TK ব্যালেন্সে যোগ করা হয়েছে।`);
+            });
+        };
+
+        // Safe Withdraw Engine Form Submission Control
+        document.getElementById('withdraw-form').onsubmit = (e) => {
+            e.preventDefault();
+            if(appConfig.withdrawStatus === 'off') return;
+
+            const selectedMethod = document.getElementById('withdraw-method').value;
+            const num = document.getElementById('withdraw-number').value.trim();
+            const amt = parseFloat(document.getElementById('withdraw-amount').value);
+            
+            const targetMethodObj = currentLoadedMethods.find(m => m.name === selectedMethod);
+            const minLimit = targetMethodObj ? targetMethodObj.limit : 100;
+
+            if(amt < minLimit) {
+                return showAlertModal('error', 'ভুল অ্যামাউন্ট', `${selectedMethod}-এ সর্বনিম্ন উইথড্র ${minLimit} TK!`);
+            }
+
+            if(parseFloat(userState.balance) < amt) {
+                return showAlertModal('error', 'পর্যাপ্ত ব্যালেন্স নেই', 'আপনার ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই!');
+            }
+
+            // Deduct from local user profile state and push task log item node
+            const finalBal = parseFloat(userState.balance) - amt;
+            db.ref(`users/${userState.username}/balance`).set(finalBal).then(() => {
+                const newReqRef = db.ref('withdrawals').push();
+                newReqRef.set({
+                    username: userState.username,
+                    method: selectedMethod,
+                    number: num,
+                    amount: amt,
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    showAlertModal('success', 'সফল হয়েছে', 'উইথড্র রিকোয়েস্ট পেন্ডিংয়ে পাঠানো হয়েছে!');
+                    document.getElementById('withdraw-form').reset();
+                });
+            });
+        };
+
+        // Cache Login Engine Router Guard
+        const savedUser = localStorage.getItem('💹UparjonBot💹_saved_user');
+        const savedPass = localStorage.getItem('💹UparjonBot💹_saved_pass');
+        if(savedUser && savedPass) {
+            const logged = await performLogin(savedUser, savedPass, true);
+            if(!logged) document.getElementById('login-page').style.display = 'block';
+        } else {
+            document.getElementById('login-page').style.display = 'block';
+        }
+    });
+    </script>
+</body>
+</html>
